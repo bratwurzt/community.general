@@ -126,22 +126,42 @@ files:
     maintainers: giner
   $filters/from_csv.py:
     maintainers: Ajpantuso
-  $filters/groupby:
+  $filters/groupby_as_dict.py:
     maintainers: felixfontein
-  $filters/hashids:
+  $filters/hashids.py:
+    maintainers: Ajpantuso
+  $filters/hashids_decode.yml:
+    maintainers: Ajpantuso
+  $filters/hashids_encode.yml:
     maintainers: Ajpantuso
   $filters/jc.py:
     maintainers: kellyjonbrazil
   $filters/json_query.py: {}
-  $filters/list.py:
+  $filters/lists_mergeby.py:
     maintainers: vbotka
-  $filters/path_join_shim.py:
-    maintainers: felixfontein
   $filters/random_mac.py: {}
   $filters/time.py:
     maintainers: resmo
   $filters/unicode_normalize.py:
     maintainers: Ajpantuso
+  $filters/to_days.yml:
+    maintainers: resmo
+  $filters/to_hours.yml:
+    maintainers: resmo
+  $filters/to_milliseconds.yml:
+    maintainers: resmo
+  $filters/to_minutes.yml:
+    maintainers: resmo
+  $filters/to_months.yml:
+    maintainers: resmo
+  $filters/to_seconds.yml:
+    maintainers: resmo
+  $filters/to_time_unit.yml:
+    maintainers: resmo
+  $filters/to_weeks.yml:
+    maintainers: resmo
+  $filters/to_years.yml:
+    maintainers: resmo
   $filters/version_sort.py:
     maintainers: ericzolf
   $inventories/:
@@ -234,6 +254,9 @@ files:
     maintainers: amigus endlesstrax
   $module_utils/:
     labels: module_utils
+  $module_utils/gconftool2.py:
+    maintainers: russoz
+    labels: gconftool2
   $module_utils/gitlab.py:
     notify: jlozadad
     maintainers: $team_gitlab
@@ -260,6 +283,8 @@ files:
   $module_utils/module_helper.py:
     maintainers: russoz
     labels: module_helper
+  $module_utils/net_tools/pritunl/:
+    maintainers: Lowess
   $module_utils/oracle/oci_utils.py:
     maintainers: $team_oracle
     labels: cloud
@@ -282,6 +307,9 @@ files:
   $module_utils/xenserver.py:
     maintainers: bvitnik
     labels: xenserver
+  $module_utils/xfconf.py:
+    maintainers: russoz
+    labels: xfconf
   $modules/cloud/alicloud/:
     maintainers: xiaozhu36
   $modules/cloud/atomic/atomic_container.py:
@@ -310,6 +338,8 @@ files:
     ignore: hnakamur
   $modules/cloud/lxd/lxd_profile.py:
     maintainers: conloos
+  $modules/cloud/lxd/lxd_project.py:
+    maintainers: we10710aa
   $modules/cloud/memset/:
     maintainers: glitchcrab
   $modules/cloud/misc/cloud_init_data_facts.py:
@@ -410,6 +440,8 @@ files:
     maintainers: claco
   $modules/cloud/scaleway/:
     maintainers: $team_scaleway
+  $modules/cloud/scaleway/scaleway_compute_private_network.py:
+    maintainers: pastral
   $modules/cloud/scaleway/scaleway_database_backup.py:
     maintainers: guillaume_ro_fr
   $modules/cloud/scaleway/scaleway_image_info.py:
@@ -418,6 +450,8 @@ files:
     maintainers: Spredzy
   $modules/cloud/scaleway/scaleway_organization_info.py:
     maintainers: Spredzy
+  $modules/cloud/scaleway/scaleway_private_network.py:
+    maintainers: pastral
   $modules/cloud/scaleway/scaleway_security_group.py:
     maintainers: DenBeke
   $modules/cloud/scaleway/scaleway_security_group_info.py:
@@ -542,6 +576,8 @@ files:
     maintainers: adamgoossens
   $modules/identity/keycloak/keycloak_identity_provider.py:
     maintainers: laurpaum
+  $modules/identity/keycloak/keycloak_realm_info.py:
+    maintainers: fynncfchen
   $modules/identity/keycloak/keycloak_realm.py:
     maintainers: kris2kris
   $modules/identity/keycloak/keycloak_role.py:
@@ -556,6 +592,8 @@ files:
     maintainers: phumpal
     labels: airbrake_deployment
     ignore: bpennypacker
+  $modules/monitoring/alerta_customer.py:
+    maintainers: cwollinger
   $modules/monitoring/bigpanda.py:
     maintainers: hkariti
   $modules/monitoring/circonus_annotation.py:
@@ -587,7 +625,7 @@ files:
   $modules/monitoring/nagios.py:
     maintainers: tbielawa tgoetheyn
   $modules/monitoring/newrelic_deployment.py:
-    maintainers: mcodd
+    ignore: mcodd
   $modules/monitoring/pagerduty.py:
     maintainers: suprememoocow thaumos
     labels: pagerduty
@@ -679,7 +717,7 @@ files:
   $modules/notification/discord.py:
     maintainers: cwollinger
   $modules/notification/flowdock.py:
-    maintainers: mcodd
+    ignore: mcodd
   $modules/notification/grove.py:
     maintainers: zimbatm
   $modules/notification/hipchat.py:
@@ -730,6 +768,8 @@ files:
     maintainers: mwarkentin
   $modules/packaging/language/bundler.py:
     maintainers: thoiberg
+  $modules/packaging/language/cargo.py:
+    maintainers: radek-sprta
   $modules/packaging/language/composer.py:
     maintainers: dmtrs
     ignore: resmo
@@ -817,7 +857,7 @@ files:
   $modules/packaging/os/opkg.py:
     maintainers: skinp
   $modules/packaging/os/pacman.py:
-    maintainers: elasticdog indrajitr tchernomax
+    maintainers: elasticdog indrajitr tchernomax jraby
     labels: pacman
     ignore: elasticdog
   $modules/packaging/os/pacman_key.py:
@@ -975,6 +1015,8 @@ files:
     maintainers: farhan7500 gautamphegde
   $modules/storage/ibm/:
     maintainers: tzure
+  $modules/storage/pmem/pmem.py:
+    maintainers: mizumm
   $modules/storage/vexata/:
     maintainers: vexata
   $modules/storage/zfs/:
@@ -992,7 +1034,7 @@ files:
   $modules/system/alternatives.py:
     maintainers: mulby
     labels: alternatives
-    ignore: DavidWittman
+    ignore: DavidWittman jiuka
   $modules/system/aix_lvol.py:
     maintainers: adejoux
   $modules/system/awall.py:
@@ -1020,6 +1062,11 @@ files:
   $modules/system/gconftool2.py:
     maintainers: Akasurde kevensen
     labels: gconftool2
+  $modules/system/gconftool2_info.py:
+    maintainers: russoz
+    labels: gconftool2
+  $modules/system/homectl.py:
+    maintainers: jameslivulpi
   $modules/system/interfaces_file.py:
     maintainers: obourdon hryamzik
     labels: interfaces_file
@@ -1160,7 +1207,8 @@ files:
   $modules/web_infrastructure/jenkins_script.py:
     maintainers: hogarthj
   $modules/web_infrastructure/jira.py:
-    maintainers: Slezhuk tarka pertoft DWSR
+    maintainers: Slezhuk tarka pertoft
+    ignore: DWSR
     labels: jira
   $modules/web_infrastructure/nginx_status_info.py:
     maintainers: resmo
@@ -1229,7 +1277,7 @@ macros:
   team_cyberark_conjur: jvanderhoof ryanprior
   team_e_spirit: MatrixCrawler getjack
   team_flatpak: JayKayy oolongbrothers
-  team_gitlab: Lunik Shaps dj-wasabi marwatk waheedi zanssa scodeman metanovii sh0shin
+  team_gitlab: Lunik Shaps dj-wasabi marwatk waheedi zanssa scodeman metanovii sh0shin nejch lgatellier suukit
   team_hpux: bcoca davx8342
   team_huawei: QijunPan TommyLike edisonxiang freesky-edward hwDCN niuzhenguo xuxiaowei0512 yanzhangi zengchen1024 zhongjun2
   team_ipa: Akasurde Nosmoht fxfitz justchris1

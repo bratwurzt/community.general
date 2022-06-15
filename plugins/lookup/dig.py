@@ -27,13 +27,15 @@ DOCUMENTATION = '''
         This needs to be passed-in as an additional parameter to the lookup
     options:
       _terms:
-        description: domain(s) to query
+        description: Domain(s) to query.
       qtype:
-        description: record type to query
+        description:
+            - Record type to query.
+            - C(DLV) has been removed in community.general 6.0.0.
         default: 'A'
-        choices: [A, ALL, AAAA, CNAME, DNAME, DLV, DNSKEY, DS, HINFO, LOC, MX, NAPTR, NS, NSEC3PARAM, PTR, RP, RRSIG, SOA, SPF, SRV, SSHFP, TLSA, TXT]
+        choices: [A, ALL, AAAA, CNAME, DNAME, DNSKEY, DS, HINFO, LOC, MX, NAPTR, NS, NSEC3PARAM, PTR, RP, RRSIG, SOA, SPF, SRV, SSHFP, TLSA, TXT]
       flat:
-        description: If 0 each record is returned as a dictionary, otherwise a string
+        description: If 0 each record is returned as a dictionary, otherwise a string.
         default: 1
       retry_servfail:
         description: Retry a nameserver if it returns SERVFAIL.
@@ -107,9 +109,6 @@ RETURN = """
        DNAME:
            description:
                - target
-       DLV:
-            description:
-                - algorithm, digest_type, key_tag, digest
        DNSKEY:
             description:
                 - flags, algorithm, protocol, key
@@ -163,6 +162,7 @@ RETURN = """
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 from ansible.module_utils.common.text.converters import to_native
+from ansible.utils.display import Display
 import socket
 
 try:
@@ -171,11 +171,14 @@ try:
     import dns.resolver
     import dns.reversename
     import dns.rdataclass
-    from dns.rdatatype import (A, AAAA, CNAME, DLV, DNAME, DNSKEY, DS, HINFO, LOC,
+    from dns.rdatatype import (A, AAAA, CNAME, DNAME, DNSKEY, DS, HINFO, LOC,
                                MX, NAPTR, NS, NSEC3PARAM, PTR, RP, SOA, SPF, SRV, SSHFP, TLSA, TXT)
     HAVE_DNS = True
 except ImportError:
     HAVE_DNS = False
+
+
+display = Display()
 
 
 def make_rdata_dict(rdata):
@@ -190,7 +193,6 @@ def make_rdata_dict(rdata):
         AAAA: ['address'],
         CNAME: ['target'],
         DNAME: ['target'],
-        DLV: ['algorithm', 'digest_type', 'key_tag', 'digest'],
         DNSKEY: ['flags', 'algorithm', 'protocol', 'key'],
         DS: ['algorithm', 'digest_type', 'key_tag', 'digest'],
         HINFO: ['cpu', 'os'],
@@ -220,8 +222,6 @@ def make_rdata_dict(rdata):
             if isinstance(val, dns.name.Name):
                 val = dns.name.Name.to_text(val)
 
-            if rdata.rdtype == DLV and f == 'digest':
-                val = dns.rdata._hexify(rdata.digest).replace(' ', '')
             if rdata.rdtype == DS and f == 'digest':
                 val = dns.rdata._hexify(rdata.digest).replace(' ', '')
             if rdata.rdtype == DNSKEY and f == 'key':

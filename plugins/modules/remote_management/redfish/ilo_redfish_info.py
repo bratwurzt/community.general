@@ -34,19 +34,19 @@ options:
     type: str
   username:
     description:
-      - User for authentication with iLO.
+      - Username for authenticating to iLO.
     type: str
   password:
     description:
-      - Password for authentication with iLO.
+      - Password for authenticating to iLO.
     type: str
   auth_token:
     description:
-      - Security token for authentication with iLO.
+      - Security token for authenticating to iLO.
     type: str
   timeout:
     description:
-      - Timeout in seconds for URL requests to iLO.
+      - Timeout in seconds for HTTP requests to iLO.
     default: 10
     type: int
 author:
@@ -105,7 +105,7 @@ CATEGORY_COMMANDS_DEFAULT = {
 }
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils._text import to_native
+from ansible.module_utils.common.text.converters import to_native
 from ansible_collections.community.general.plugins.module_utils.ilo_redfish_utils import iLORedfishUtils
 
 

@@ -53,6 +53,12 @@ options:
         Please notice that C(ansible-galaxy) will not install collections with I(type=both), when I(requirements_file)
         contains both roles and collections and I(dest) is specified.
     type: path
+  no_deps:
+    description:
+      - Refrain from installing dependencies.
+    version_added: 4.5.0
+    type: bool
+    default: false
   force:
     description:
       - Force overwriting an existing role or collection.
@@ -64,6 +70,17 @@ options:
     description:
       - Acknowledge using Ansible 2.9 with its limitations, and prevents the module from generating warnings about them.
       - This option is completely ignored if using a version of Ansible greater than C(2.9.x).
+      - Note that this option will be removed without any further deprecation warning once support
+        for Ansible 2.9 is removed from this module.
+    type: bool
+    default: false
+  ack_min_ansiblecore211:
+    description:
+      - Acknowledge the module is deprecating support for Ansible 2.9 and ansible-base 2.10.
+      - Support for those versions will be removed in community.general 8.0.0.
+        At the same time, this option will be removed without any deprecation warning!
+      - This option is completely ignored if using a version of ansible-core/ansible-base/Ansible greater than C(2.11).
+      - For the sake of conciseness, setting this parameter to C(true) implies I(ack_ansible29=true).
     type: bool
     default: false
 """
@@ -178,7 +195,7 @@ class AnsibleGalaxyInstall(CmdModuleHelper):
     ansible_version = None
     is_ansible29 = None
 
-    output_params = ('type', 'name', 'dest', 'requirements_file', 'force')
+    output_params = ('type', 'name', 'dest', 'requirements_file', 'force', 'no_deps')
     module = dict(
         argument_spec=dict(
             type=dict(type='str', choices=('collection', 'role', 'both'), required=True),
@@ -186,7 +203,9 @@ class AnsibleGalaxyInstall(CmdModuleHelper):
             requirements_file=dict(type='path'),
             dest=dict(type='path'),
             force=dict(type='bool', default=False),
+            no_deps=dict(type='bool', default=False),
             ack_ansible29=dict(type='bool', default=False),
+            ack_min_ansiblecore211=dict(type='bool', default=False),
         ),
         mutually_exclusive=[('name', 'requirements_file')],
         required_one_of=[('name', 'requirements_file')],
@@ -201,12 +220,13 @@ class AnsibleGalaxyInstall(CmdModuleHelper):
         requirements_file=dict(fmt=('-r', '{0}'),),
         dest=dict(fmt=('-p', '{0}'),),
         force=dict(fmt="--force", style=ArgFormat.BOOLEAN),
+        no_deps=dict(fmt="--no-deps", style=ArgFormat.BOOLEAN),
     )
     force_lang = "en_US.UTF-8"
     check_rc = True
 
     def _get_ansible_galaxy_version(self):
-        ansible_galaxy = self.module.get_bin_path("ansible-galaxy", required=True)
+        ansible_galaxy = self.get_bin_path("ansible-galaxy", required=True)
         dummy, out, dummy = self.module.run_command([ansible_galaxy, "--version"], check_rc=True)
         line = out.splitlines()[0]
         match = self._RE_GALAXY_VERSION.match(line)
@@ -218,6 +238,14 @@ class AnsibleGalaxyInstall(CmdModuleHelper):
 
     def __init_module__(self):
         self.ansible_version = self._get_ansible_galaxy_version()
+        if self.ansible_version < (2, 11) and not self.vars.ack_min_ansiblecore211:
+            self.module.deprecate(
+                "Support for Ansible 2.9 and ansible-base 2.10 is being deprecated. "
+                "At the same time support for them is ended, also the ack_ansible29 option will be removed. "
+                "Upgrading is strongly recommended, or set 'ack_min_ansiblecore211' to supress this message.",
+                version="8.0.0",
+                collection_name="community.general",
+            )
         self.is_ansible29 = self.ansible_version < (2, 10)
         if self.is_ansible29:
             self._RE_INSTALL_OUTPUT = re.compile(r"^(?:.*Installing '(?P<collection>\w+\.\w+):(?P<cversion>[\d\.]+)'.*"
@@ -273,10 +301,10 @@ class AnsibleGalaxyInstall(CmdModuleHelper):
         self.vars.set("new_collections", {})
         self.vars.set("new_roles", {})
         self.vars.set("ansible29_change", False, change=True, output=False)
-        if not self.vars.ack_ansible29:
-            self.module.warn("Ansible 2.9 or older: unable to retrieve lists of roles and collections already installed")
+        if not (self.vars.ack_ansible29 or self.vars.ack_min_ansiblecore211):
+            self.warn("Ansible 2.9 or older: unable to retrieve lists of roles and collections already installed")
             if self.vars.requirements_file is not None and self.vars.type == 'both':
-                self.module.warn("Ansible 2.9 or older: will install only roles from requirement files")
+                self.warn("Ansible 2.9 or older: will install only roles from requirement files")
 
     def _setup210plus(self):
         self.vars.set("new_collections", {}, change=True)
@@ -293,7 +321,7 @@ class AnsibleGalaxyInstall(CmdModuleHelper):
             self._setup29()
         else:
             self._setup210plus()
-        params = ('type', {'galaxy_cmd': 'install'}, 'force', 'dest', 'requirements_file', 'name')
+        params = ('type', {'galaxy_cmd': 'install'}, 'force', 'no_deps', 'dest', 'requirements_file', 'name')
         self.run_command(params=params)
 
     def process_command_output(self, rc, out, err):

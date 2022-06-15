@@ -34,19 +34,19 @@ options:
     type: str
   username:
     description:
-      - User for authentication with iLO.
+      - Username for authenticating to iLO.
     type: str
   password:
     description:
-      - Password for authentication with iLO.
+      - Password for authenticating to iLO.
     type: str
   auth_token:
     description:
-      - Security token for authentication with OOB controller.
+      - Security token for authenticating to iLO.
     type: str
   timeout:
     description:
-      - Timeout in seconds for URL requests to iLO controller.
+      - Timeout in seconds for HTTP requests to iLO.
     default: 10
     type: int
   attribute_name:
@@ -82,6 +82,17 @@ EXAMPLES = '''
       password: Testpass123
       attribute_name: TimeZone
       attribute_value: Chennai
+
+  - name: Set NTP Servers
+    community.general.ilo_redfish_config:
+      category: Manager
+      command: SetNTPServers
+      baseuri: 15.X.X.X
+      username: Admin
+      password: Testpass123
+      attribute_name: StaticNTPServers
+      attribute_value: X.X.X.X
+
 '''
 
 RETURN = '''
@@ -98,7 +109,7 @@ CATEGORY_COMMANDS_ALL = {
 
 from ansible_collections.community.general.plugins.module_utils.ilo_redfish_utils import iLORedfishUtils
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils._text import to_native
+from ansible.module_utils.common.text.converters import to_native
 
 
 def main():

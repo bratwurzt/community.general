@@ -23,6 +23,7 @@ options:
     description:
       - The commands allowed by the sudoers rule.
       - Multiple can be added by passing a list of commands.
+      - Use C(ALL) for all commands.
     type: list
     elements: str
   group:
@@ -41,6 +42,11 @@ options:
       - Whether a password will be required to run the sudo'd command.
     default: true
     type: bool
+  runas:
+    description:
+      - Specify the target user the command(s) will run as.
+    type: str
+    version_added: 4.7.0
   sudoers_path:
     description:
       - The path which sudoers config files will be managed in.
@@ -68,6 +74,14 @@ EXAMPLES = '''
     state: present
     user: backup
     commands: /usr/local/bin/backup
+
+- name: Allow the bob user to run any commands as alice with sudo -u alice
+  community.general.sudoers:
+    name: bob-do-as-alice
+    state: present
+    user: bob
+    runas: alice
+    commands: ALL
 
 - name: >-
     Allow the monitoring group to run sudo /usr/local/bin/gather-app-metrics
@@ -101,6 +115,8 @@ from ansible.module_utils.common.text.converters import to_native
 
 class Sudoers(object):
 
+    FILE_MODE = 0o440
+
     def __init__(self, module):
         self.check_mode = module.check_mode
         self.name = module.params['name']
@@ -108,6 +124,7 @@ class Sudoers(object):
         self.group = module.params['group']
         self.state = module.params['state']
         self.nopassword = module.params['nopassword']
+        self.runas = module.params['runas']
         self.sudoers_path = module.params['sudoers_path']
         self.file = os.path.join(self.sudoers_path, self.name)
         self.commands = module.params['commands']
@@ -118,6 +135,8 @@ class Sudoers(object):
 
         with open(self.file, 'w') as f:
             f.write(self.content())
+
+        os.chmod(self.file, self.FILE_MODE)
 
     def delete(self):
         if self.check_mode:
@@ -130,7 +149,12 @@ class Sudoers(object):
 
     def matches(self):
         with open(self.file, 'r') as f:
-            return f.read() == self.content()
+            content_matches = f.read() == self.content()
+
+        current_mode = os.stat(self.file).st_mode & 0o777
+        mode_matches = current_mode == self.FILE_MODE
+
+        return content_matches and mode_matches
 
     def content(self):
         if self.user:
@@ -140,7 +164,8 @@ class Sudoers(object):
 
         commands_str = ', '.join(self.commands)
         nopasswd_str = 'NOPASSWD:' if self.nopassword else ''
-        return "{owner} ALL={nopasswd} {commands}\n".format(owner=owner, nopasswd=nopasswd_str, commands=commands_str)
+        runas_str = '({runas})'.format(runas=self.runas) if self.runas is not None else ''
+        return "{owner} ALL={runas}{nopasswd} {commands}\n".format(owner=owner, runas=runas_str, nopasswd=nopasswd_str, commands=commands_str)
 
     def run(self):
         if self.state == 'absent' and self.exists():
@@ -167,6 +192,10 @@ def main():
         'nopassword': {
             'type': 'bool',
             'default': True,
+        },
+        'runas': {
+            'type': 'str',
+            'default': None,
         },
         'sudoers_path': {
             'type': 'str',

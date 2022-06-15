@@ -8,7 +8,7 @@
 # still belong to the author of the module, and may assign their own license
 # to the complete work.
 #
-# Simplified BSD License (see licenses/simplified_bsd.txt or https://opensource.org/licenses/BSD-2-Clause)
+# Simplified BSD License (see simplified_bsd.txt or https://opensource.org/licenses/BSD-2-Clause)
 
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
@@ -75,11 +75,14 @@ class LXDClient(object):
         else:
             raise LXDClientException('URL scheme must be unix: or https:')
 
-    def do(self, method, url, body_json=None, ok_error_codes=None, timeout=None):
+    def do(self, method, url, body_json=None, ok_error_codes=None, timeout=None, wait_for_container=None):
         resp_json = self._send_request(method, url, body_json=body_json, ok_error_codes=ok_error_codes, timeout=timeout)
         if resp_json['type'] == 'async':
             url = '{0}/wait'.format(resp_json['operation'])
             resp_json = self._send_request('GET', url)
+            if wait_for_container:
+                while resp_json['metadata']['status'] == 'Running':
+                    resp_json = self._send_request('GET', url)
             if resp_json['metadata']['status'] != 'Success':
                 self._raise_err_from_json(resp_json)
         return resp_json
