@@ -608,6 +608,8 @@ plugin_routing:
       redirect: community.general.identity.keycloak.keycloak_role
     keycloak_user_federation:
       redirect: community.general.identity.keycloak.keycloak_user_federation
+    keycloak_user_rolemapping:
+      redirect: community.general.identity.keycloak.keycloak_user_rolemapping
     kibana_plugin:
       redirect: community.general.database.misc.kibana_plugin
     kubevirt_cdi_upload:
