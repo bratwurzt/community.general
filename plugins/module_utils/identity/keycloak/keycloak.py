@@ -732,43 +732,21 @@ class KeycloakAPI(object):
             self.module.fail_json(msg="Could not fetch available rolemappings for client %s and userId %s, realm %s: %s"
                                       % (cid, uid, realm, str(e)))
 
-    def delete_user_rolemapping(self, gid, cid, role_rep, realm="master"):
+    def delete_user_rolemapping(self, uid, cid, realm="master"):
         """ Delete the rolemapping of a client in a specified user on the Keycloak server.
 
-        :param gid: ID of the user from which to obtain the rolemappings.
+        :param uid: ID of the user from which to obtain the rolemappings.
         :param cid: ID of the client from which to obtain the rolemappings.
-        :param role_rep: Representation of the role to assign.
         :param realm: Realm from which to obtain the rolemappings.
         :return: None.
         """
-        available_rolemappings_url = URL_USER_ROLEMAPPINGS.format(url=self.baseurl, realm=realm, id=gid, client=cid)
+        available_rolemappings_url = URL_USER_ROLEMAPPINGS.format(url=self.baseurl, realm=realm, id=uid, client=cid)
         try:
             open_url(available_rolemappings_url, method="DELETE", headers=self.restheaders,
                      validate_certs=self.validate_certs, timeout=self.connection_timeout)
         except Exception as e:
             self.module.fail_json(msg="Could not delete available rolemappings for client %s and userId %s, realm %s: %s"
-                                      % (cid, gid, realm, str(e)))
-
-    def get_client_user_rolemapping_by_id(self, uid, cid, rid, realm='master'):
-        """ Obtain client representation by id
-
-        :param uid: ID of the user from which to obtain the rolemappings.
-        :param cid: ID of the client from which to obtain the rolemappings.
-        :param rid: ID of the role.
-        :param realm: client from this realm
-        :return: dict of rolemapping representation or None if none matching exist
-        """
-        rolemappings_url = URL_USER_ROLEMAPPINGS.format(url=self.baseurl, realm=realm, id=uid, client=cid)
-        try:
-            rolemappings = json.loads(to_native(open_url(rolemappings_url, method="GET", headers=self.restheaders, timeout=self.connection_timeout,
-                                                         validate_certs=self.validate_certs).read()))
-            for role in rolemappings:
-                if rid == role['id']:
-                    return role
-        except Exception as e:
-            self.module.fail_json(msg="Could not fetch rolemappings for client %s for user %s, realm %s: %s"
                                       % (cid, uid, realm, str(e)))
-        return None
 
     def get_client_templates(self, realm='master'):
         """ Obtains client template representations for client templates in a realm
