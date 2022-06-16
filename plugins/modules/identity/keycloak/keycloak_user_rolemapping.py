@@ -289,20 +289,21 @@ def main():
         module.exit_json(msg="Nothing to do (no roles specified).")
     else:
         for role_index, role in enumerate(roles, start=0):
-            if role['name'] is None and role['id'] is None:
+            if role.get('name') is None and role.get('id') is None:
                 module.fail_json(msg='Either the `name` or `id` has to be specified on each role.')
             # Fetch missing role_id
-            if role['id'] is None:
-                role_id = kc.get_client_role_by_name(uid, cid, role['name'], realm=realm)
+            if role.get('id') is None:
+                print('realm: %s' % (realm))
+                role_id = kc.get_client_role_by_name(uid, cid, role.get('name'), realm=realm)
                 if role_id is not None:
                     role['id'] = role_id
                 else:
-                    module.fail_json(msg='Could not fetch role %s for client_id %s' % (role['name'], client_id))
+                    module.fail_json(msg='Could not fetch role %s for client_id %s' % (role.get('name'), client_id))
             # Fetch missing role_name
             else:
-                role['name'] = kc.get_client_user_rolemapping_by_id(uid, cid, role['id'], realm=realm)['name']
-                if role['name'] is None:
-                    module.fail_json(msg='Could not fetch role %s for client_id %s' % (role['id'], client_id))
+                role['name'] = kc.get_client_user_rolemapping_by_id(uid, cid, role.get('id'), realm=realm)['name']
+                if role.get('name') is None:
+                    module.fail_json(msg='Could not fetch role %s for client_id %s' % (role.get('id'), client_id))
 
     # Get effective client-level role mappings
     available_roles_before = kc.get_client_user_available_rolemappings(uid, cid, realm=realm)
@@ -316,18 +317,18 @@ def main():
         # Fetch roles to assign if state present
         if state == 'present':
             for available_role in available_roles_before:
-                if role['name'] == available_role['name']:
+                if role.get('name') == available_role.get('name'):
                     update_roles.append({
-                        'id': role['id'],
-                        'name': role['name'],
+                        'id': role.get('id'),
+                        'name': role.get('name'),
                     })
         # Fetch roles to remove if state absent
         else:
             for assigned_role in assigned_roles_before:
-                if role['name'] == assigned_role['name']:
+                if role.get('name') == assigned_role.get('name'):
                     update_roles.append({
-                        'id': role['id'],
-                        'name': role['name'],
+                        'id': role.get('id'),
+                        'name': role.get('name'),
                     })
 
     if len(update_roles):
