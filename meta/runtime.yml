@@ -606,6 +606,8 @@ plugin_routing:
       redirect: community.general.identity.keycloak.keycloak_realm_info
     keycloak_role:
       redirect: community.general.identity.keycloak.keycloak_role
+    keycloak_role_composites:
+      redirect: community.general.identity.keycloak.keycloak_role_composites
     keycloak_user_federation:
       redirect: community.general.identity.keycloak.keycloak_user_federation
     kibana_plugin:
