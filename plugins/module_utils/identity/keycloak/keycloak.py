@@ -437,6 +437,9 @@ class KeycloakAPI(object):
         try:
             return open_url(client_url, method='POST', headers=self.restheaders, timeout=self.connection_timeout,
                             data=json.dumps(clientrep), validate_certs=self.validate_certs)
+        except HTTPError as e:
+            self.module.fail_json(msg='Could not create client %s in realm %s: %s' % (clientrep['clientId'], realm, self._get_extended_message(e)),
+                                      exception=traceback.format_exc())
         except Exception as e:
             self.module.fail_json(msg='Could not create client %s in realm %s: %s'
                                       % (clientrep['clientId'], realm, str(e)))
@@ -1934,3 +1937,27 @@ class KeycloakAPI(object):
         except Exception as e:
             self.module.fail_json(msg='Unable to delete component %s in realm %s: %s'
                                       % (cid, realm, str(e)))
+
+    @staticmethod
+    def _get_extended_message(error):
+        """
+        Get Redfish ExtendedInfo message from response payload if present
+        :param error: an HTTPError exception
+        :type error: HTTPError
+        :return: the ExtendedInfo message if present, else standard HTTP error
+        """
+        msg = http_client.responses.get(error.code, '')
+        if error.code >= 400:
+            try:
+                body = error.read().decode('utf-8')
+                msg = json.loads(body)
+                # ext_info = data['error']['@Message.ExtendedInfo']
+                # # if the ExtendedInfo contains a user friendly message send it
+                # # otherwise try to send the entire contents of ExtendedInfo
+                # try:
+                #     msg = ext_info[0]['Message']
+                # except Exception:
+                #     msg = str(data['error']['@Message.ExtendedInfo'])
+            except Exception:
+                pass
+        return msg
